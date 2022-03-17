@@ -35,7 +35,7 @@ public class ServerThread extends Thread {
 
             }while(!readRequest.equals(""));
 
-            Request HTTP = new Request(request.toString().split(System.lineSeparator()), socket.getInetAddress(), output);
+            Request HTTP = new Request(request.toString().split(System.lineSeparator()), output);
             HTTP.Response();
 
 

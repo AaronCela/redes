@@ -1,13 +1,11 @@
 package es.udc.redes.webserver;
 import java.io.*;
-import java.net.InetAddress;
 import java.nio.file.Files;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
 
 public class Request {
     private final String[] lineRequest;
-    private InetAddress ip;
     private int status=200;
     private File file;
     private PrintWriter outputPw;
@@ -15,9 +13,8 @@ public class Request {
 
 
 
-    public Request(String[] request,InetAddress ip, OutputStream output) {
+    public Request(String[] request, OutputStream output) {
         this.lineRequest = request;
-        this.ip=ip;
         this.outputS= output;
     }
 
@@ -27,7 +24,6 @@ public class Request {
         FileName=validate();
         outputPw = new PrintWriter(outputS, true);
         if(FileName == null) {
-            file = new File("p1-files/error", "error400.html");
             status = 400;
         }
 
@@ -36,10 +32,8 @@ public class Request {
         }
 
         if(!file.exists()) {
-            file = new File("p1-files/error", "error404.html");
             status = 404;
         }
-        IfModifiedSince();
         Head(outputPw, status);
     }
 
@@ -63,24 +57,6 @@ public class Request {
         return chunks[1];
     }
 
-    public boolean modVerificate(File f, String date) {
-        long segundosFecha = (ZonedDateTime.parse(date,(DateTimeFormatter.RFC_1123_DATE_TIME)).toEpochSecond());
-
-        long f_fecha = f.lastModified()/1000;
-
-        return (segundosFecha < f_fecha);
-    }
-
-    public void IfModifiedSince() {
-        for (String request : lineRequest) {
-            if (request.startsWith("If-Modified-Since: ")) {
-                if (!modVerificate(file, request.substring(19))) {
-                    status = 304;
-                    return;
-                }
-            }
-        }
-    }
 
 
     public static String getDate() {
