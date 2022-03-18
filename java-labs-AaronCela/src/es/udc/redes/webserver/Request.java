@@ -1,5 +1,6 @@
 package es.udc.redes.webserver;
 import java.io.*;
+import java.net.InetAddress;
 import java.nio.file.Files;
 import java.time.*;
 import java.time.format.DateTimeFormatter;
@@ -24,6 +25,7 @@ public class Request {
         FileName=validate();
         outputPw = new PrintWriter(outputS, true);
         if(FileName == null) {
+            file = new File("p1-files", "error400.html");
             status = 400;
         }
 
@@ -32,8 +34,10 @@ public class Request {
         }
 
         if(!file.exists()) {
+            file = new File("p1-files", "error404.html");
             status = 404;
         }
+        IfModifiedSince();
         Head(outputPw, status);
     }
 
@@ -46,10 +50,10 @@ public class Request {
 
         if(chunks.length <3)
             return null;
-        
-        if (!chunks[2].startsWith("HTTP/")) 
+
+        if (!chunks[2].startsWith("HTTP/"))
             return null;
-        
+
         str= chunks[0];
         if(!str.equals("GET") && !str.equals("HEAD"))
             return null;
@@ -57,6 +61,24 @@ public class Request {
         return chunks[1];
     }
 
+    public boolean modVerificate(File f, String date) {
+        long segundosFecha = (ZonedDateTime.parse(date,(DateTimeFormatter.RFC_1123_DATE_TIME)).toEpochSecond());
+
+        long f_fecha = f.lastModified()/1000;
+
+        return (segundosFecha < f_fecha);
+    }
+
+    public void IfModifiedSince() {
+        for (String request : lineRequest) {
+            if (request.startsWith("If-Modified-Since: ")) {
+                if (!modVerificate(file, request.substring(19))) {
+                    status = 304;
+                    return;
+                }
+            }
+        }
+    }
 
 
     public static String getDate() {
