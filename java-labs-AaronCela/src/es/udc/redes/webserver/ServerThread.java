@@ -31,7 +31,7 @@ public class ServerThread extends Thread {
                 request.append(readRequest);
 
                 request.append(System.lineSeparator());
-                System.out.println("request = " + request.toString());
+               
 
             }while(!readRequest.equals(""));
 
